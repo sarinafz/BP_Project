@@ -106,6 +106,10 @@ int create_configs() {
     strcpy(cwd_copy, cwd);
     FILE *file9 = fopen(strcat(cwd_copy, "/.neogit/hook_all"), "w");
     fclose(file9);
+    fprintf(file9,
+            "todo-check\neof-blank-space\nformat-check\nbalance-braces\nstatic-error-check\nfile-size-check\ncharacter-limit\n");
+
+
 
 //    file = fopen(".neogit/tracks", "w");
 //    fclose(file);
@@ -293,7 +297,6 @@ int config_function(int argc, char *const argv[]) {
         // change local config
     } else if (strstr(argv[2], "user") != NULL) {
         if (argc != 4) {
-            perror("rerer");
             perror("invalid command");
             return 1;
         }
@@ -320,14 +323,6 @@ int config_function(int argc, char *const argv[]) {
         return 1;
     }
 }
-
-//// todo ********************************************************
-//void print_command(int argc, char *argv[]) {
-//    for (int i = 0; i < argc; i++) {
-//        fprintf(stdout, "%s ", argv[i]);
-//    }
-//    fprintf(stdout, "\n");
-//}
 
 // todo ********************************************************
 int check_local_alias(int *argc, char *argv[]) {
@@ -487,7 +482,6 @@ void add_dir(int argc, char *argv[], int path) {
 
         } else if (entry->d_type == DT_DIR && strcmp(entry->d_name, ".") != 0 &&
                    strcmp(entry->d_name, "..") && strcmp(entry->d_name, ".neogit") != 0) {
-            perror("45450");
             char dicdic_path[PATH_MAX];
             snprintf(dicdic_path, sizeof(dicdic_path), "%s/%s", argv[path], entry->d_name);
             strcpy(argv[10], dicdic_path);
@@ -531,7 +525,7 @@ void add_file(int argc, char *argv[], int path) {
         fclose(f1);
         fclose(f2);
     }
-    printf("source: %s\n", argv[path]);
+//    printf("source: %s\n", argv[path]);
     snprintf(system_command, sizeof(system_command), "cp %s %s/%s", argv[path], cwd_copy, ".neogit/stage");
     system(system_command);
     // put name and path of the file in stage data
@@ -567,14 +561,9 @@ int add_n(char cwd[]) {
         char stage_data_path[PATH_MAX];
         snprintf(stage_data_path, sizeof(stage_data_path), "%s/%s", cwd_copy_add, ".neogit/stage_data");
 //
-//        printf("pth: %s\n", stage_data_path);
-//        printf("cwd_copy: %s\n", cwd_copy);
 
         FILE *stage_data = fopen(stage_data_path, "r");
-        perror("diling dooloong");
 
-//        printf("name of object= %s\n", entry->d_name);
-        // check if it is a file
         if (entry->d_type == DT_REG && strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
             int match = 0;
             char buffer[MAX_LINE];
@@ -776,7 +765,6 @@ void reset_directory(int argc, char *argv[], int path) {
                     char system_command[PATH_MAX];
                     snprintf(system_command, sizeof(system_command), "cp %s/%s/%s %s/%s", cwd_copy, ".neogit/stage",
                              entry->d_name, cwd_copy, ".neogit/unstage");
-//                    printf("system command; %s\n", system_command);
                     system(system_command);
 
                     char remove_path[PATH_MAX];
@@ -833,12 +821,6 @@ void reset_undo() {
     char line[MAX_LINE];
     char name_of_unstaged_file[50], path_of_unstaged_file[PATH_MAX];
 
-//    if (fgets(line, sizeof(line), unstage_data)){
-//
-//        printf("there aren't any unstaged file");
-//        fseek(unstage_data,0,SEEK_SET);
-//    }
-
     // read stage data to match
     while (fgets(line, sizeof(line), unstage_data) != NULL) {
         sscanf(line, "%s %s", name_of_unstaged_file, path_of_unstaged_file);
@@ -888,7 +870,6 @@ int reset_function(int argc, char *argv[]) {
         FILE *file = fopen(argv[2], "r");
         if (file != NULL) {
             reset_file(argc, argv, 2);
-            perror("123");
             continue;
         }
         printf("there is no file or directory with this path");
@@ -1127,15 +1108,12 @@ int change_number_of_commit_in_branch(char cwd[], char branch_name[]) {
     // find number of commit of that branch
     int number_of_commit_branch;
     fscanf(branch_config, "%d\n1", &number_of_commit_branch);
-    printf("***number of commits in commit: %d\n", number_of_commit_branch);
     number_of_commit_branch++;
-    printf("***number of commits in commit: %d\n", number_of_commit_branch);
     fclose(branch_config);
 
     FILE *branch_config2 = fopen(branch_config_path, "w");
     fprintf(branch_config2, "%d\n1", number_of_commit_branch);
     fclose(branch_config2);
-    printf("***number of commits in commit: %d\n", number_of_commit_branch);
     return number_of_commit_branch;
 
 }
@@ -1191,7 +1169,6 @@ int if_first_or_not() {
     snprintf(branch_config_path, sizeof(branch_config_path), "%s/%s/config_%s", cwd_main_file, ".neogit/branches",
              branch_name);
     FILE *branch_config = fopen(branch_config_path, "r");
-    perror("[][]");
 
     int stat;
     fscanf(branch_config, "%*d\n%d", &stat);
@@ -1342,7 +1319,6 @@ int commit_function(int argc, char *argv[]) {
     // open config of branch in branches folder
     // find number of commit of that branch
     int number_of_commit_in_branch = change_number_of_commit_in_branch(cwd, branch_name);
-    perror("-----");
     // open commit folder in branch
     char commit_in_branch_path[PATH_MAX];
     snprintf(commit_in_branch_path, sizeof(commit_in_branch_path), "%s/%s/%d", ".neogit/branches", branch_name,
@@ -1893,7 +1869,6 @@ int branch_function(int argc, char *argv[], char cwd[]) {
                  ".neogit/branches", argv[2]);
         FILE *file5 = fopen(branch_config_in_commit_path, "w");
         fprintf(file5, "%d\n0", number_of_last_commit);
-        printf("number of last commit in creat branch: %d\n", number_of_last_commit);
 
         fclose(file5);
 
@@ -1945,7 +1920,6 @@ find_last_commited_files_in_exact_branch(char name_of_branch[], int number_of_la
     }
 
     fclose(all_commit_data);
-    printf("x: %d", x);
     return x;
 }
 
@@ -1983,7 +1957,6 @@ int delete_files_appended_after(char cwd[], int last_branch_id, char branch_name
                         break;
                     }
                 }
-                perror("[][]");
             } else {
                 for (int i = count - 1; i >= 0; i--) {
                     if (strcmp(path[i], unknown_file_path) == 0) {
@@ -2339,7 +2312,6 @@ int checkout_function(int argc, char *argv[], char cwd[]) {
 
 // todo ********************************************************
 void write_and_copy_new_info_in_all_commit(char cwd[], int last_id) {
-    printf("**last id: %d\n", last_id);
     // open all_commit_data
     char all_data_path[200];
     snprintf(all_data_path, sizeof(all_data_path), "%s/%s", cwd_main_file, ".neogit/branches/all_commit_data");
@@ -2350,17 +2322,11 @@ void write_and_copy_new_info_in_all_commit(char cwd[], int last_id) {
     char name[100][100], path[100][PATH_MAX], massage[100][100], author[100][50];
     int id, commit_num;
     while (fgets(buffer[count], sizeof(buffer), all_commit_data) != NULL) {
-        printf("buffer: %s\n", buffer[count]);
         sscanf(buffer[count], "%d %s %d %s %s %s /%*[^/]s/ /%[^\n]s/\n", &id, branch_name[count], &commit_num,
                name[count],
                path[count], author[count], massage[count]);
-        printf("id: %d\n", id);
         if (id != last_id)
             continue;
-        printf("count: %d\n", count);
-
-        printf("branch: %s\n", branch_name[count]);
-
         count++;
     }
 
@@ -2395,7 +2361,6 @@ void write_and_copy_new_info_in_all_commit(char cwd[], int last_id) {
     char pre_commit_path[PATH_MAX];
     snprintf(pre_commit_path, sizeof(pre_commit_path), "%s/%s/%s/%d", cwd, ".neogit/branches", branch_name[0],
              commit_num);
-    printf("pre commit path: %s\n", pre_commit_path);
     DIR *dir = opendir(pre_commit_path);
     struct dirent *entry;
 
@@ -2473,16 +2438,12 @@ void write_and_copy_new_info_in_all_commit_m(char cwd[], int last_id, char *argv
     char name[100][100], path[100][PATH_MAX], massage[100], author[100][50];
     int id, commit_num;
     while (fgets(buffer[count], sizeof(buffer), all_commit_data) != NULL) {
-        printf("buffer: %s\n", buffer[count]);
         sscanf(buffer[count], "%d %s %d %s %s %s /%*[^/]s/ /%*[^\n]s/\n", &id, branch_name[count], &commit_num,
                name[count],
                path[count], author[count]);
-        printf("id: %d\n", id);
         if (id != last_id)
             continue;
-        printf("count: %d\n", count);
 
-        printf("branch: %s\n", branch_name[count]);
 
         count++;
     }
@@ -2517,7 +2478,6 @@ void write_and_copy_new_info_in_all_commit_m(char cwd[], int last_id, char *argv
     snprintf(new_commit_path, sizeof(new_commit_path), "%s/%s/%s/%d", cwd, ".neogit/branches", branch_name[0],
              number_of_last_commit + 1);
     mkdir(new_commit_path, 0755);
-    perror("][][");
 
     char pre_commit_path[PATH_MAX];
     snprintf(pre_commit_path, sizeof(pre_commit_path), "%s/%s/%s/%d", cwd, ".neogit/branches", branch_name[0],
@@ -2699,7 +2659,6 @@ int tag(int argc, char *argv[], char cwd[]) {
 
 // todo ********************************************************
 int tag_a(int argc, char *argv[], char cwd[]) {
-    printf("argc= %d\n", argc);
     // open tag
     char tag_path[200];
     snprintf(tag_path, sizeof(tag_path), "%s/%s", cwd_main_file, ".neogit/branches/tag");
@@ -3117,8 +3076,6 @@ int diff(int argc, char *argv[]) {
     }
     printf("invalid command");
     return 0;
-
-
 }
 
 
@@ -3196,7 +3153,6 @@ int merge(int argc, char *argv[], char cwd[]) {
 
     char name[100][100], path[100][PATH_MAX], massage[100][100], author[100][50];
     for (int i = 0; i < count; ++i) {
-        printf("data: %s\n", data[i]);
         sscanf(data[i], "%*d %*s %*d %s %s %s /%*[^/]s/ /%[^\n]s/\n", name[i],
                path[i], author[i], massage[i]);
     }
@@ -3290,12 +3246,13 @@ struct state {
     char static_error_check[100];
     char file_size_check[100];
     char character_limit[100];
+    char time_limit[100];
 };
 struct state hook[100];
 int number_of_hook_file;
 int fail;
 
-void hook_todo_u(char cwd[]) {
+void hook_eof_blank_space_u(char cwd[]) {
     // open file
     char path[PATH_MAX];
     snprintf(path, sizeof(path), "%s/%s", cwd, ".neogit/hook");
@@ -3308,7 +3265,6 @@ void hook_todo_u(char cwd[]) {
 
     fseek(file, -1, SEEK_END);
 
-
     fseek(file, 0, SEEK_SET);
 
     while (fgetc(file) == ' ')
@@ -3317,7 +3273,6 @@ void hook_todo_u(char cwd[]) {
     fputc('\0', file);
 
     fclose(file);
-
 }
 
 void hook_todo(char file_name[], char dir_path[]) {
@@ -3381,7 +3336,7 @@ void hook_todo(char file_name[], char dir_path[]) {
     }
 }
 
-void hook_eof_blank_space(char file_name[], char dir_path[]) {
+void hook_eof_blank_space(char *argv[], char file_name[], char dir_path[]) {
 
     // open file
     char path[PATH_MAX];
@@ -3413,6 +3368,9 @@ void hook_eof_blank_space(char file_name[], char dir_path[]) {
 
     } else {
         strcpy(hook[number_of_hook_file].eof_blank_space, "SKIPPED");
+    }
+    if (strcmp(argv[2], "-u") == 0) {
+        hook_eof_blank_space(argv, file_name, dir_path);
     }
 
 }
@@ -3583,6 +3541,52 @@ void hook_character_limit(char file_name[], char dir_path[]) {
 
 }
 
+void hook_time_limit(char file_name[], char dir_path[]) {
+    if (strstr(file_name, ".mp3") != NULL || strstr(file_name, ".mp4") != NULL || strstr(file_name, ".wav") != NULL) {
+
+        // open file
+        char path[PATH_MAX];
+        snprintf(path, sizeof(path), "%s/%s", dir_path, file_name);
+        FILE *file = fopen(path, "rb");
+
+        fseek(file, 0, SEEK_END);
+        long file_size = ftell(file);
+        rewind(file);
+
+        char line[4];
+        fseek(file, file_size - 128, SEEK_SET);
+        fread(line, sizeof(line), 1, file);
+        fclose(file);
+
+
+        int minutes = (line[6] - '0') * 10 + (line[7] - '0');
+        int seconds = (line[24] - '0') * 10 + (line[25] - '0');
+        int total_seconds = minutes * 60 + seconds;
+        printf("Duration: %d seconds\n", total_seconds);
+
+        if (total_seconds > 600) {
+            strcpy(hook[number_of_hook_file].time_limit, "FAILED");
+
+            printf("\033[1;31m");
+            printf("hook id: time-limit -> %s\n", hook[number_of_hook_file].time_limit);
+            printf("\033[0m");
+
+
+        } else {
+            strcpy(hook[number_of_hook_file].time_limit, "PASSED");
+
+            printf("\033[1;32m");
+            printf("hook id: time-limit -> %s\n", hook[number_of_hook_file].time_limit);
+            printf("\033[0m");
+
+        }
+        
+    } else
+        strcpy(hook[number_of_hook_file].time_limit, "SKIPPED");
+
+}
+
+
 int pre_commit(int argc, char *argv[], char cwd[]) {
     // open file
     char path[PATH_MAX];
@@ -3609,7 +3613,7 @@ int pre_commit(int argc, char *argv[], char cwd[]) {
             }
 
             if (strstr(all, "eof-blank-space") != NULL) {
-                hook_eof_blank_space(entry->d_name, dir_path);
+                hook_eof_blank_space(argv, entry->d_name, dir_path);
             }
 
             if (strstr(all, "format-check") != NULL) {
@@ -3632,14 +3636,24 @@ int pre_commit(int argc, char *argv[], char cwd[]) {
                 hook_character_limit(entry->d_name, dir_path);
             }
 
+            if (strstr(all, "time-limit") != NULL) {
+                hook_time_limit(entry->d_name, dir_path);
+            }
+
             number_of_hook_file++;
         }
     }
     if (fail == 1) {
-        printf("Are you sure you want to commit?\n");
-        // TODO ask and answer
+        char input;
+        printf("Are you sure you want to commit?(Y OR N)\n");
+        scanf("%c", &input);
+        if (input == 'Y') {
+            printf("Type a massage\n");
+            scanf("%s", argv[3]);
+            commit_function(argc, argv);
+        }
     }
-
+    return 0;
 }
 
 void hook_all_list(char cwd[]) {
@@ -3706,9 +3720,78 @@ void hook_remove(char cwd[], char hook_id[]) {
     rename(path_c, path);
 }
 
+
+int pre_commit_f(int argc, char *argv[], char cwd[]) {
+    // open file
+    char path[PATH_MAX];
+    snprintf(path, sizeof(path), "%s/%s", cwd, ".neogit/hook");
+    FILE *file = fopen(path, "r");
+
+    char line[MAX_LINE], all[MAX_LINE];
+    while (fgets(line, sizeof(line), file) != NULL) {
+        strcat(all, line);
+    }
+
+    char dir_path[200];
+    snprintf(dir_path, sizeof(dir_path), "%s/%s", cwd_main_file, ".neogit/stage");
+    for (int i = 3; i < argc - 1; ++i) {
+
+        strcpy(hook[number_of_hook_file].name, argv[i]);
+        printf("File Name: %s\n", hook[number_of_hook_file].name);
+
+        if (strstr(all, "todo-check") != NULL) {
+            hook_todo(argv[i], dir_path);
+        }
+
+        if (strstr(all, "eof-blank-space") != NULL) {
+            hook_eof_blank_space(argv, argv[i], dir_path);
+        }
+
+        if (strstr(all, "format-check") != NULL) {
+            hook_format_check(argv[i], dir_path);
+        }
+
+        if (strstr(all, "balance-braces") != NULL) {
+            hook_balance_braces(argv[i], dir_path);
+        }
+
+        if (strstr(all, "static-error-check") != NULL) {
+            hook_static_error_check(argv[i], dir_path);
+        }
+
+        if (strstr(all, "file-size-check") != NULL) {
+            hook_file_size_check(argv[i], dir_path);
+        }
+
+        if (strstr(all, "character-limit") != NULL) {
+            hook_character_limit(argv[i], dir_path);
+        }
+
+        if (strstr(all, "time-limit") != NULL) {
+            hook_time_limit(argv[i], dir_path);
+        }
+
+        number_of_hook_file++;
+    }
+    if (fail == 1) {
+        char input;
+        printf("Are you sure you want to commit?(Y OR N)\n");
+        scanf("%c", &input);
+        if (input == 'Y') {
+            printf("Type a massage\n");
+            scanf("%s", argv[3]);
+            commit_function(argc, argv);
+        }
+    }
+    return 0;
+}
+
+
 int pre_commit_menu(int argc, char *argv[], char cwd[]) {
     if (argc == 2) {
         pre_commit(argc, argv, cwd);
+    } else if (argc == 5 && strcmp(argv[2], "-f") == 0) {
+        pre_commit_f(argc, argv, cwd);
     } else if (argc == 4) {
         if (strcmp(argv[argc - 1], "list") == 0) {
             hook_all_list(cwd);
